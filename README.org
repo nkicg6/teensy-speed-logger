@@ -1,0 +1,68 @@
+#+TITLE: teensy-speed-logger
+#+AUTHOR: Nick George
+#+email: nicholas.george32@gmail.com
+
+* Description
+
+A simple microcontroller based speedometer and distance logger. 
+
+* Materials
+
+- [[https://www.pjrc.com/store/teensy32.html][Teensy 3.2]] or comparable arduino-like microcontroller development board.
+- [[https://www.amazon.com/gp/product/B00488G6P8/ref=oh_aui_detailpage_o00_s00?ie=UTF8&psc=1][SD card]] (data logging)
+- [[https://www.sparkfun.com/products/544][SD card breakout]] (unless your development board comes with one)
+- [[https://www.velleman.eu/products/view/?id=435540][Hall sensor/switch]] I link the the Velleman one here, but any hall sensor will do.
+- /FUTURE FEATURE/  [[https://www.velleman.eu/products/view/?id=435516][real time clock]] for keeping time in logs (again, my local store sells velleman parts, which are generally pretty good)
+
+* About
+
+Written to log data from small treadmills for animal based behavior experiments. 
+
+** Wiring
+
+Connect the SD card as described [[http://nickgeorge.net/projects/greenhouse_project/][here]]. 
+
+Quick fritzing diagram below:
+
+[[file:docs/img/teensy-speed-logger_bb.png]]
+
+
+** Useage
+   /Under active development! Both the api and core functions are still under development/ 
+
+#+BEGIN_SRC c++
+  const int log_interval = 1000; // ms between logging
+  const int on_off_pin = 14;
+  const int hall = 8; // hall sensor
+  const int resolution = 10; // how often to update state. 
+  uint32_t readTime;
+  volatile bool on_off_switch = false; // switch for activating a session
+  volatile bool state = false; // holds state info
+
+#+END_SRC
+
+Change these constants depending on your setup and needs. =log_interval= determines how many ms between each csv-log write. 
+
+=hall= is the pin your hall sensor is connected to. This should be digital. 
+
+=resolution= is the ms delay between each loop. this will need to change to be compatible with the SD card write time. 
+
+=on_off_switch= switch to start and stop experiments, do not change. 
+
+=state= if the hall switch registers, this will be set to true by an interrupt.
+
+
+this software should compile with the arduino ide or [[http://platformio.org/][platformio]]. I have instructions on my website for using [[http://nickgeorge.net/notes/platformio_emcas/][platformio with Emacs]] if you are interested. 
+
+
+* Future improvements
+
+1. make serial.println into write functions to write to SD card. 
+2. R or python analysis script with standard output. Could trigger a raspberry pi to run it upon shutting off the experiment. 
+3. API for experiment configuration (for example, set header for csv log file programmatically before experiments)
+4. web interface client (likely python-flask based with a raspberry pi server)
+5. real time plotting on web interface
+6. camera trigger (trigger a raspberry pi camera to start recording via simple GPIO pulse)
+
+Let me know any other ideas!
+
