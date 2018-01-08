@@ -24,7 +24,7 @@ Connect the SD card as described [[http://nickgeorge.net/projects/greenhouse_pro
 
 Quick fritzing diagram below:
 
-[[file:docs/img/teensy-speed-logger_bb.png]]
+[[file:docs/img/teensy-speed-logger_bb-new.png]]
 
 
 ** Useage
