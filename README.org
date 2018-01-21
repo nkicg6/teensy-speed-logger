@@ -31,17 +31,16 @@ Quick fritzing diagram below:
    /Under active development! Both the api and core functions are still under development/ 
 
 #+BEGIN_SRC c++
-  const int log_interval = 1000; // ms between logging
   const int on_off_pin = 14;
   const int hall = 8; // hall sensor
   const int resolution = 10; // how often to update state. 
   uint32_t readTime;
   volatile bool on_off_switch = false; // switch for activating a session
-  volatile bool state = false; // holds state info
-
+  const byte debounceTime = 100; // debouncing time for on-off button
+  const byte indicatorLed = 7; // indicator led
 #+END_SRC
 
-Change these constants depending on your setup and needs. =log_interval= determines how many ms between each csv-log write. 
+Change these constants depending on your setup and needs.
 
 =hall= is the pin your hall sensor is connected to. This should be digital. 
 
@@ -49,11 +48,21 @@ Change these constants depending on your setup and needs. =log_interval= determi
 
 =on_off_switch= switch to start and stop experiments, do not change. 
 
-=state= if the hall switch registers, this will be set to true by an interrupt.
+=debounceTime= is there to control for hall sensor double hits.
 
+=indicatorLed= if you want an indicator to tell you whether it is off or on. 
 
-this software should compile with the arduino ide or [[http://platformio.org/][platformio]]. I have instructions on my website for using [[http://nickgeorge.net/notes/platformio_emcas/][platformio with Emacs]] if you are interested. 
+this software should compile with the arduino ide or [[http://platformio.org/][platformio]]. I have instructions on my website for using [[http://nickgeorge.net/notes/platformio_emcas/][platformio with Emacs]] if you are interested.
 
+*** Startup
+
+    When you plug in the system to power, you will see the on-board led light up once. This is the system checking the SD card, creating the file, and writing the header. The indicator LED should then flash twice then turn off. This means that the system is ready to go. Now just switch "on" the switch and you are ready to record. Every time you move the switch, you will see that a =---= is printed in the SD card file. This indicates a new session. 
+
+*** TODO Python analysis script. 
+
+When plugged into a computer (likely a dedicated raspberry pi) and sensing a serial connection, the python script will read the SD card data, date stamp it, divide it into session, and re-save the file as a different name along with charts and session data. This ensures that your sessions stay organized and the Arduino code stays as simple and fast as possible.
+
+*** TODO Fix on off button and state sensing. 
 
 * Future improvements
 
