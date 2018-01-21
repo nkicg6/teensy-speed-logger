@@ -8,12 +8,13 @@ A simple speedometer and distance logger for experiments
 const int log_interval = 1000; // ms between logging
 const int on_off_pin = 14;
 const int hall = 8; // hall sensor
-const int resolution = 10; // how often to update state. 
+const int resolution = 100; // how often to update state. 
 uint32_t readTime;
 volatile bool on_off_switch = false; // switch for activating a session
 volatile bool state = false; // holds state info
 volatile unsigned long last_micros; // for button debounce
-const int debounceTime = 80; // debounceing time for on-off button
+volatile unsigned long lastRead; // debounce for hall sensor
+const int debounceTime = 100; // debounceing time for on-off button
 
 
 void setup() {
@@ -26,17 +27,15 @@ void setup() {
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
   if (on_off_switch == false){
     delay(resolution);
   } else {
     if (state == false){
-      //Serial.print(millis()); Serial.print(", "); Serial.print("0");Serial.println("\n");
       delay(resolution);
     }  else {
       Serial.print(millis()); Serial.print(", "); Serial.print("1");Serial.println("\n");
       state = false;
-    } 
+    }
   }
 }
 
@@ -50,10 +49,10 @@ void on_off(){
 }
 
 
-
-
 void movement(){
-  state = true;
-  
+  if((long) (micros() - lastRead) >= debounceTime * 1000){
+    state = true;
+    lastRead = micros();
+  }
 }
 
