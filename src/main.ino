@@ -7,55 +7,69 @@ A simple speedometer and distance logger for experiments
 */
 
 File speed_log; // speed log file
-const int chipSelect = 10; // sd card
-const int on_off_pin = 14;
-const int hall = 8; // hall sensor
-const int resolution = 100; // how often to update state. 
+const byte chipSelect = 10; // sd card
+const byte on_off_pin = 14;
+const byte hall = 8; // hall sensor
+const byte resolution = 100; // how often to update state. 
 uint32_t readTime;
 volatile bool on_off_switch = false; // switch for activating a session
 //volatile bool state = false; // holds state info
 volatile unsigned long last_micros; // for button debounce
 volatile unsigned long lastRead; // debounce for hall sensor
-const int debounceTime = 100; // debounceing time for on-off button
-const int indicatorLed = ;
+const byte debounceTime = 100; // debounceing time for on-off button
+const byte indicatorLed = 7; // indicator led
 
 
 void setup() {
-  // put your setup code here, to run once:
-  Serial.begin(9600);
-  
-  attachInterrupt(digitalPinToInterrupt(on_off_pin), on_off, RISING);
+
+  Serial.begin(11600); 
+  attachInterrupt(digitalPinToInterrupt(on_off_pin), on_off, CHANGE);
   attachInterrupt(digitalPinToInterrupt(hall), movement, CHANGE);
+  pinMode(indicatorLed, OUTPUT);
   card_check();
   data_check();
+  //last_micros = micros();
+  digitalWrite(indicatorLed, HIGH);
+  delay(1000);
+  digitalWrite(indicatorLed, LOW);
+  delay(1000);
+  digitalWrite(indicatorLed, HIGH);
+  delay(1000);
+  digitalWrite(indicatorLed, LOW);
 }
 
 void loop() {
   if (on_off_switch == false){
+    digitalWrite(indicatorLed, LOW);
     delay(resolution);
   } else {
+    digitalWrite(indicatorLed, HIGH);
     delay(resolution);
   }       
 } 
 
+
 void on_off(){
-  if((long) (micros() - last_micros) >= debounceTime * 1000){
-    on_off_switch =! on_off_switch;
-    last_micros = micros();
-    speed_log = SD.open("speed.csv", O_CREAT | O_WRITE | O_APPEND);
-    speed_log.println("----");
-    speed_log.flush();
-    speed_log.close();
-    Serial.println("state change");
-  }
+  Serial.println("on off called");
+  last_micros = micros();
+  Serial.println(on_off_switch);
+  on_off_switch = !on_off_switch;
+  speed_log = SD.open("speed.csv", O_CREAT | O_WRITE | O_APPEND);
+  speed_log.println("----");
+  speed_log.flush();
+  speed_log.close();
+  Serial.println("state change"); 
 }
 
 
 // control debounce and record movement
 void movement(){
-  if((long) (micros() - lastRead) >= debounceTime * 1000){
+  if(on_off_switch == true && (long) (micros() - lastRead) >= debounceTime * 1000){
     lastRead = micros();
+    Serial.println("active");
     writeData();
+  } else{
+    return;
   }
 }
 
@@ -92,6 +106,7 @@ void data_check(){
     speed_log.println("# Contact: nicholas.m.george@ucdenver.edu");
     speed_log.println("# Updated: 2018-01-21");
     speed_log.println("Timestamp (ms)");
+    speed_log.flush();
     speed_log.close();
   }
 }
