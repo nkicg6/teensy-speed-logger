@@ -12,6 +12,8 @@ const int resolution = 10; // how often to update state.
 uint32_t readTime;
 volatile bool on_off_switch = false; // switch for activating a session
 volatile bool state = false; // holds state info
+volatile unsigned long last_micros; // for button debounce
+const int debounceTime = 80; // debounceing time for on-off button
 
 
 void setup() {
@@ -33,29 +35,25 @@ void loop() {
       delay(resolution);
     }  else {
       Serial.print(millis()); Serial.print(", "); Serial.print("1");Serial.println("\n");
-      Serial.println("Trigger");
       state = false;
     } 
   }
- }
+}
 
 
 void on_off(){
-  if (on_off_switch == false){
-    on_off_switch = true;
-    Serial.println("On!");
-    readTime = millis();
-  }
-  else {
-    Serial.println("off!");
-    on_off_switch = false;
-    return;
+  if((long) (micros() - last_micros) >= debounceTime * 1000){
+    on_off_switch =! on_off_switch;
+    last_micros = micros();
+    Serial.println("state change");
   }
 }
 
+
+
+
 void movement(){
   state = true;
-  Serial.println("TRIGGER!");
   
 }
 
