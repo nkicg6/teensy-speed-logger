@@ -25,7 +25,7 @@ const byte indicatorLed = 7; // indicator led
 void setup() {
 
   Serial.begin(11600); 
-  attachInterrupt(digitalPinToInterrupt(on_off_pin), on_off, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(on_off_pin), on, RISING);
   attachInterrupt(digitalPinToInterrupt(hall), movement, CHANGE);
   pinMode(indicatorLed, OUTPUT);
   card_check();
@@ -54,7 +54,7 @@ void loop() {
 } 
 
 
-void on_off(){
+void on(){
   Serial.println("on called");
   on_off_switch = true;
   last_micros = micros();
