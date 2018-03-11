@@ -6,17 +6,19 @@
 A simple speedometer and distance logger for experiments
 */
 
+
 File speed_log; // speed log file
 const byte chipSelect = 10; // sd card
 const byte on_off_pin = 14;
 const byte hall = 8; // hall sensor
-const byte resolution = 100; // how often to update state. 
+const byte resolution = 100; // how often to update state.
+volatile bool on_off_switch = false;
 uint32_t readTime;
-volatile bool on_off_switch = false; // switch for activating a session
+const byte debounceTime = 100; // debounceing time for detector
+volatile int switch_val; // switch for activating a session
 //volatile bool state = false; // holds state info
 volatile unsigned long last_micros; // for button debounce
 volatile unsigned long lastRead; // debounce for hall sensor
-const byte debounceTime = 100; // debounceing time for on-off button
 const byte indicatorLed = 7; // indicator led
 
 
@@ -39,26 +41,28 @@ void setup() {
 }
 
 void loop() {
-  if (on_off_switch == false){
-    digitalWrite(indicatorLed, LOW);
-    delay(resolution);
-  } else {
+  switch_val = digitalRead(on_off_pin);
+  if (switch_val== HIGH){
     digitalWrite(indicatorLed, HIGH);
     delay(resolution);
+  } else {
+    on_off_switch = false;
+    digitalWrite(indicatorLed, LOW);
+    delay(resolution);
+    Serial.println("off");
   }       
 } 
 
 
 void on_off(){
-  Serial.println("on off called");
+  Serial.println("on called");
+  on_off_switch = true;
   last_micros = micros();
-  Serial.println(on_off_switch);
-  on_off_switch = !on_off_switch;
+  Serial.println(switch_val);
   speed_log = SD.open("speed.csv", O_CREAT | O_WRITE | O_APPEND);
   speed_log.println("----");
   speed_log.flush();
   speed_log.close();
-  Serial.println("state change"); 
 }
 
 
@@ -104,7 +108,7 @@ void data_check(){
     speed_log.println("# Speed logger");
     speed_log.println("# Author: Nick George");
     speed_log.println("# Contact: nicholas.m.george@ucdenver.edu");
-    speed_log.println("# Updated: 2018-01-21");
+    speed_log.println("# Updated: 2018-03-10");
     speed_log.println("Timestamp (ms)");
     speed_log.flush();
     speed_log.close();
