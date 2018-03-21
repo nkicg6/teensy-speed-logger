@@ -10,8 +10,10 @@ A simple speedometer and distance logger for experiments
 File speed_log; // speed log file
 const byte chipSelect = 10; // sd card
 const byte on_off_pin = 14;
-const byte hall = 8; // hall sensor
+const byte hall = 0; // hall sensor
 const byte resolution = 100; // how often to update state.
+const byte camera_on = 1; // turn external camera on
+const byte camera_off = 2; // turn external camera off
 volatile bool on_off_switch = false;
 uint32_t readTime;
 const byte debounceTime = 100; // debounceing time for detector
@@ -19,7 +21,7 @@ volatile int switch_val; // switch for activating a session
 //volatile bool state = false; // holds state info
 volatile unsigned long last_micros; // for button debounce
 volatile unsigned long lastRead; // debounce for hall sensor
-const byte indicatorLed = 7; // indicator led
+const byte indicatorLed = 1; // indicator led
 
 
 void setup() {
@@ -28,6 +30,8 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(on_off_pin), on, RISING);
   attachInterrupt(digitalPinToInterrupt(hall), movement, CHANGE);
   pinMode(indicatorLed, OUTPUT);
+  pinMode(camera_on, OUTPUT);
+  pinMode(camera_off, OUTPUT);
   card_check();
   data_check();
   //last_micros = micros();
@@ -44,11 +48,15 @@ void loop() {
   switch_val = digitalRead(on_off_pin);
   if (switch_val== HIGH){
     digitalWrite(indicatorLed, HIGH);
+    digitalWrite(camera_on, HIGH); 
     delay(resolution);
+    digitalWrite(camera_on, LOW);
   } else {
     on_off_switch = false;
     digitalWrite(indicatorLed, LOW);
+    digitalWrite(camera_off, HIGH);
     delay(resolution);
+    digitalWrite(camera_off, LOW);
     Serial.println("off");
   }       
 } 
