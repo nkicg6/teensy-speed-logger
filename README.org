@@ -28,7 +28,6 @@ Quick fritzing diagram below:
 
 
 ** Useage
-   /Under active development! Both the api and core functions are still under development/ 
 
 #+BEGIN_SRC c++
   const int on_off_pin = 14;
